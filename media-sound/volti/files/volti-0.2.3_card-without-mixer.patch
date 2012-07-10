@@ -1,0 +1,34 @@
+diff -urN volti-0.2.3/src/alsactrl.py volti-0.2.3_card-without-mixer/src/alsactrl.py
+--- volti-0.2.3/src/alsactrl.py	2010-12-30 03:11:31.000000000 +0900
++++ volti-0.2.3_card-without-mixer/src/alsactrl.py	2011-02-07 14:10:31.761308412 +0900
+@@ -189,7 +189,12 @@
+     def get_mixers(self, card_index=0):
+         """ Returns mixers list """
+         mixers = []
+-        for mixer in alsa.mixers(card_index):
++        amixers = []
++        try :
++            amixers = alsa.mixers(card_index)
++        except alsa.ALSAAudioError:
++            pass
++        for mixer in amixers:
+             try:
+                 m = alsa.Mixer(control=mixer, cardindex=card_index)
+                 cap = m.volumecap()
+diff -urN volti-0.2.3/src/mixer.py volti-0.2.3_card-without-mixer/src/mixer.py
+--- volti-0.2.3/src/mixer.py	2010-12-30 03:11:31.000000000 +0900
++++ volti-0.2.3_card-without-mixer/src/mixer.py	2011-02-07 14:33:37.052308414 +0900
+@@ -139,7 +139,12 @@
+                         self.cp.get("card-%d" % card_index, "mask_control"))
+             except:
+                 self.control_mask[card_index] = 0
+-                for count, mixer in enumerate(alsa.mixers(card_index)):
++                amixers = []
++                try:
++                    amixers = alsa.mixers(card_index)
++                except alsa.ALSAAudioError:
++                    pass
++                for count, mixer in enumerate(amixers):
+                     self.control_mask[card_index] |= (1 << count)
+ 
+             n = 0
