@@ -1,0 +1,4 @@
+LDPATH="/usr/dt/lib"
+PATH="/usr/dt/bin"
+MANPATH="/usr/dt/man"
+
