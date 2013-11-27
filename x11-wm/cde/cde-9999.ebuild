@@ -87,7 +87,10 @@ src_install() {
 	# as much as possible (more probably requires patching)
 	einfo "Relocating some files to comply with FHS as much as"
 	einfo "possible.  More probably requires patching ..."
-	mv -v "${D}"/usr/dt/{bin,lib.man} "${D}"/usr/
+	mv -v "${D}"/usr/dt/{bin,lib} "${D}"/usr/
+	mkdir -pv "${D}"/usr/share/man
+	mv -v "${D}"/usr/dt/share/man/* "${D}"/usr/share/man/
+	ln -sfv "${D}"/usr/share/man "${D}"/usr/dt/man
 	#
 	# Misc directories
 	#
