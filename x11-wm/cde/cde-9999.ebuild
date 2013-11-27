@@ -4,7 +4,7 @@
 
 EAPI=4
 
-inherit git-2
+inherit git-r3
 
 DESCRIPTION="The Common Desktop Environment, the classic UNIX desktop"
 HOMEPAGE="http://cdesktopenv.sourceforge.net/"
@@ -16,8 +16,7 @@ KEYWORDS="~x86 ~amd64"
 IUSE=""
 
 EGIT_REPO_URI="git://git.code.sf.net/p/cdesktopenv/code"
-EGIT_PROJECT="cde"
-
+S="${WORKDIR}/${P}/cde"
 
 DEPEND="x11-libs/libXp
 		x11-libs/libXt
@@ -46,14 +45,12 @@ DEPEND="x11-libs/libXp
 RDEPEND="${DEPEND}"
 
 src_prepare() {
-	cd "${S}"/cde
 	mkdir -p imports/x11/include
 	cd imports/x11/include
 	ln -s /usr/include/X11 .
 }
 
 src_compile() {
-	cd "${S}"/cde
 	#
 	# The make invokation below accomplishes the following:
 	#
@@ -68,7 +65,6 @@ src_compile() {
 }
 
 src_install() {
-	cd "${S}"/cde
 	#
 	# Install CDE files
 	#
@@ -78,25 +74,31 @@ src_install() {
 					CDE-MSG-C CDE-HELP-C CDE-SHLIBS CDE-HELP-PRG \
 					CDE-PRG CDE-INC CDE-DEMOS CDE-MAN-DEV CDE-ICONS \
 					CDE-FONTS CDE-INFO CDE-INFOLIB-C"
-	DATABASE_DIR="${S}"/cde/databases
+	DATABASE_DIR="${S}"/databases
 	for db in ${DATABASE_FILES}; do
 		einfo "Fileset ${db}"
 		einfo "    ${DATABASE_DIR}/${db}.udb -> ${T}/${db}.lst"
 		/bin/ksh ./udbToAny.ksh -toLst -ReleaseStream linux \
 			"${DATABASE_DIR}"/"${db}".udb > "${T}"/"${db}".lst
 		einfo "    ${T}/${db}.lst -> ${D}"
-		/bin/ksh ./mkProd -D "${D}" -S "${S}"/cde "${T}"/"${db}".lst
+		/bin/ksh ./mkProd -D "${D}" -S "${S}" "${T}"/"${db}".lst
 	done
+	# Move stuff that we can out of /usr/dt to comply with FHS
+	# as much as possible (more probably requires patching)
+	einfo "Relocating some files to comply with FHS as much as"
+	einfo "possible.  More probably requires patching ..."
+	mv -v "${D}"/usr/dt/{bin,lib.man} "${D}"/usr/
 	#
 	# Misc directories
 	#
 	# These are required according to CDE website wiki
+	# (complying with FHS probably requires patching)
 	dodir /var/dt
 	fperms 0777 /var/dt
 	dodir /usr/spool/calendar
 	#
 	# env.d for /usr/dt paths
-	doenvd "${FILESDIR}"/95cde
+	#doenvd "${FILESDIR}"/95cde  # NO LONGER REQUIRED WITH mv ABOVE
 }
 
 pkg_postinst() {
