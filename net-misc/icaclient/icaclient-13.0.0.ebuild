@@ -4,7 +4,7 @@
 
 EAPI=4
 
-inherit multilib eutils rpm
+inherit multilib eutils rpm 
 
 DESCRIPTION="ICA Client for Citrix Presentation servers"
 HOMEPAGE="http://www.citrix.com/"
@@ -66,9 +66,7 @@ RDEPEND="x11-terms/xterm
 		)
 		>=app-emulation/emul-linux-x86-soundlibs-20110928
 		>=app-emulation/emul-linux-x86-gtklibs-20110928
-		nsplugin? (
-			www-plugins/nspluginwrapper
-		)
+		nsplugin? ( www-plugins/nspluginwrapper )
 	)"
 DEPEND=""
 S="${WORKDIR}${ICAROOT}"
@@ -92,7 +90,7 @@ src_install() {
 	if use nsplugin
 	then
 		doexe npica.so
-		dosym "${ICAROOT}"/npica.so /usr/$(get_libdir)/nsbrowser/plugins/npica.so
+		dosym "${ICAROOT}"/npica.so /usr/lib32/nsbrowser/plugins/npica.so
 	fi
 
 	insinto "${ICAROOT}"
@@ -167,4 +165,13 @@ src_install() {
 
 	dodir /etc/revdep-rebuild/
 	echo "SEARCH_DIRS_MASK="${ICAROOT}"" > "${D}"/etc/revdep-rebuild/70icaclient
+}
+
+pkg_postinst() {
+	if use amd64 && use nsplugin; then
+		einfo
+		einfo "To use the browser plugin with a 64-bit browser, run"
+		einfo "#  nspluginwrapper -i /usr/lib32/nsbrowser/plugins/npica.so"
+		einfo ""
+	fi
 }
